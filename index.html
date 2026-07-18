@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lo Diet — Plataforma profissional para nutricionistas. Gerencie pacientes, calcule IMC, crie planos alimentares e acompanhe a evolução.">
+    <title>Lo Diet — Plataforma para Nutricionistas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-mark">
+                    <svg viewBox="0 0 32 32" width="32" height="32">
+                        <defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs>
+                        <rect width="32" height="32" rx="8" fill="url(#logoGrad)"/>
+                        <text x="16" y="22" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="Outfit">L</text>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <span class="logo-name">LoDiet</span>
+                    <span class="logo-sub">Nutrição Pro</span>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Principal</div>
+            <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-item" data-view="pacientes" id="nav-pacientes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                <span>Pacientes</span>
+            </button>
+
+            <div class="nav-section-label">Ferramentas</div>
+            <button class="nav-item" data-view="imc" id="nav-imc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                <span>Calculadora IMC</span>
+            </button>
+            <button class="nav-item" data-view="dieta" id="nav-dieta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span>Plano de Dieta</span>
+            </button>
+            <button class="nav-item" data-view="agua" id="nav-agua">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+                <span>Controle de Água</span>
+            </button>
+
+            <div class="nav-section-label">Sistema</div>
+            <button class="nav-item" data-view="anotacoes" id="nav-anotacoes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Anotações</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">N</div>
+                <div class="user-info">
+                    <span class="user-name">Nutricionista</span>
+                    <span class="user-role">CRN 12345</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header" id="mobile-header">
+        <button class="hamburger" id="hamburger" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
+        </button>
+        <span class="mobile-title">LoDiet</span>
+        <div style="width:32px"></div>
+    </header>
+
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- ===== DASHBOARD VIEW ===== -->
+        <div class="view active" id="view-dashboard">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Dashboard</h1>
+                    <p class="view-subtitle">Bem-vindo de volta! Aqui está o resumo do seu consultório.</p>
+                </div>
+                <div class="header-date" id="header-date"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card stat-green">
+                    <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-pacientes">0</span>
+                        <span class="stat-label">Pacientes</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-dietas">0</span>
+                        <span class="stat-label">Refeições planejadas</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-imcs">0</span>
+                        <span class="stat-label">Cálculos de IMC</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-cyan">
+                    <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-agua">0L</span>
+                        <span class="stat-label">Água hoje</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚡ Ações Rápidas</h3>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="navigateTo('pacientes')">
+                            <div class="quick-icon green">👤</div>
+                            <span>Novo Paciente</span>
+                        </button>
+                        <button class="quick-btn" onclick="navigateTo('imc')">
+                            <div class="quick-icon blue">📊</div>
+                            <span>Calcular IMC</span>
+                        </button>
+                        <button class="quick-btn" onclick="navigateTo('dieta')">
+                            <div class="quick-icon purple">🥗</div>
+                            <span>Criar Dieta</span>
+                        </button>
+                        <button class="quick-btn" onclick="navigateTo('agua')">
+                            <div class="quick-icon cyan">💧</div>
+                            <span>Registrar Água</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Patients -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">👥 Pacientes Recentes</h3>
+                        <button class="card-link" onclick="navigateTo('pacientes')">Ver todos →</button>
+                    </div>
+                    <div class="recent-patients-list" id="dash-recent-patients">
+                        <div class="empty-small">Nenhum paciente cadastrado ainda.</div>
+                    </div>
+                </div>
+
+                <!-- Recent IMC History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 Últimos Cálculos de IMC</h3>
+                        <button class="card-link" onclick="navigateTo('imc')">Calcular →</button>
+                    </div>
+                    <div class="imc-history-list" id="dash-imc-history">
+                        <div class="empty-small">Nenhum cálculo realizado ainda.</div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="card card-tips">
+                    <div class="card-header">
+                        <h3 class="card-title">💡 Dica do Dia</h3>
+                    </div>
+                    <div class="tip-content" id="tip-content">
+                        <p class="tip-text"></p>
+                        <span class="tip-source"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PATIENTS VIEW ===== -->
+        <div class="view" id="view-pacientes">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Pacientes</h1>
+                    <p class="view-subtitle">Gerencie o cadastro dos seus pacientes.</p>
+                </div>
+                <button class="btn btn-primary" id="btn-open-patient-modal">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Novo Paciente</span>
+                </button>
+            </div>
+
+            <div class="search-bar">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="search-pacientes" class="search-input" placeholder="Buscar por nome, email ou telefone...">
+            </div>
+
+            <div class="patients-grid" id="patients-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">👤</div>
+                    <h3>Nenhum paciente cadastrado</h3>
+                    <p>Clique em "Novo Paciente" para começar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Modal -->
+        <div class="modal-overlay" id="modal-paciente">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-patient-title">Novo Paciente</h2>
+                    <button class="modal-close" id="modal-patient-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="patient-edit-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="p-nome">Nome completo *</label>
+                            <input type="text" id="p-nome" class="form-input" placeholder="Maria da Silva">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="p-email">Email</label>
+                            <input type="email" id="p-email" class="form-input" placeholder="maria@email.com">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="p-telefone">Telefone</label>
+                            <input type="tel" id="p-telefone" class="form-input" placeholder="(11) 99999-9999">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="p-nascimento">Data de nascimento</label>
+                            <input type="date" id="p-nascimento" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="p-sexo">Sexo</label>
+                            <select id="p-sexo" class="form-input form-select">
+                                <option value="">Selecione</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="p-objetivo">Objetivo</label>
+                            <select id="p-objetivo" class="form-input form-select">
+                                <option value="">Selecione</option>
+                                <option value="Emagrecimento">Emagrecimento</option>
+                                <option value="Ganho de massa">Ganho de massa</option>
+                                <option value="Manutenção">Manutenção</option>
+                                <option value="Saúde geral">Saúde geral</option>
+                                <option value="Performance">Performance esportiva</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="p-peso">Peso atual (kg)</label>
+                            <input type="number" id="p-peso" class="form-input" placeholder="70" step="0.1" min="20" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="p-altura">Altura (m)</label>
+                            <input type="number" id="p-altura" class="form-input" placeholder="1.70" step="0.01" min="0.5" max="2.5">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="p-alergias">Alergias / Restrições alimentares</label>
+                        <textarea id="p-alergias" class="form-input form-textarea" rows="2" placeholder="Ex: Intolerância à lactose, alergia a frutos do mar..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="p-obs">Observações clínicas</label>
+                        <textarea id="p-obs" class="form-input form-textarea" rows="2" placeholder="Ex: Diabético tipo 2, hipertensão controlada..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btn-cancel-patient">Cancelar</button>
+                    <button class="btn btn-primary" id="btn-save-patient">Salvar Paciente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== IMC VIEW ===== -->
+        <div class="view" id="view-imc">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Calculadora de IMC</h1>
+                    <p class="view-subtitle">Calcule o Índice de Massa Corporal e acompanhe a evolução dos pacientes.</p>
+                </div>
+            </div>
+
+            <div class="imc-layout">
+                <div class="card">
+                    <h3 class="card-title-inner">Dados do Paciente</h3>
+                    <div class="form-group">
+                        <label class="form-label" for="imc-paciente-select">Paciente cadastrado</label>
+                        <select id="imc-paciente-select" class="form-input form-select">
+                            <option value="">— Selecione ou preencha abaixo —</option>
+                        </select>
+                    </div>
+                    <div class="divider-or"><span>ou preencha manualmente</span></div>
+                    <div class="form-group">
+                        <label class="form-label" for="imc-nome">Nome</label>
+                        <input type="text" id="imc-nome" class="form-input" placeholder="Nome do paciente">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="imc-peso">Peso (kg) *</label>
+                            <input type="number" id="imc-peso" class="form-input" placeholder="70" step="0.1" min="20" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="imc-altura">Altura (m) *</label>
+                            <input type="number" id="imc-altura" class="form-input" placeholder="1.70" step="0.01" min="0.5" max="2.5">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="imc-idade">Idade</label>
+                            <input type="number" id="imc-idade" class="form-input" placeholder="30" min="1" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="imc-sexo">Sexo</label>
+                            <select id="imc-sexo" class="form-input form-select">
+                                <option value="">Selecione</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="btn-calc-imc">
+                        <span>Calcular IMC</span>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+
+                <div class="imc-result-col">
+                    <div class="card imc-result-card" id="imc-result-card" style="display:none;">
+                        <div class="result-top">
+                            <div class="result-patient-info">
+                                <h3 id="res-nome">—</h3>
+                                <span class="result-date" id="res-data"></span>
+                            </div>
+                        </div>
+
+                        <div class="imc-big-display">
+                            <div class="imc-circle" id="imc-circle">
+                                <svg viewBox="0 0 120 120" class="circle-svg">
+                                    <circle cx="60" cy="60" r="52" stroke="rgba(0,0,0,0.06)" stroke-width="8" fill="none"/>
+                                    <circle cx="60" cy="60" r="52" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" id="imc-progress-ring" transform="rotate(-90 60 60)"/>
+                                </svg>
+                                <div class="imc-number" id="imc-number">0</div>
+                                <div class="imc-unit">kg/m²</div>
+                            </div>
+                            <div class="imc-class-badge" id="imc-class-badge">—</div>
+                        </div>
+
+                        <p class="imc-recommendation" id="imc-recommendation"></p>
+
+                        <div class="imc-bar-scale">
+                            <div class="bar-track">
+                                <div class="bar-segment" style="background:#3b82f6;flex:0.185"></div>
+                                <div class="bar-segment" style="background:#22c55e;flex:0.064"></div>
+                                <div class="bar-segment" style="background:#eab308;flex:0.05"></div>
+                                <div class="bar-segment" style="background:#f97316;flex:0.05"></div>
+                                <div class="bar-segment" style="background:#ef4444;flex:0.15"></div>
+                            </div>
+                            <div class="bar-pointer" id="bar-pointer" style="left:0%"></div>
+                            <div class="bar-labels">
+                                <span>15</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40+</span>
+                            </div>
+                        </div>
+
+                        <div class="result-grid">
+                            <div class="result-stat">
+                                <span class="rs-label">Peso</span>
+                                <span class="rs-value" id="res-peso">—</span>
+                            </div>
+                            <div class="result-stat">
+                                <span class="rs-label">Altura</span>
+                                <span class="rs-value" id="res-altura">—</span>
+                            </div>
+                            <div class="result-stat">
+                                <span class="rs-label">Peso ideal</span>
+                                <span class="rs-value" id="res-ideal">—</span>
+                            </div>
+                            <div class="result-stat">
+                                <span class="rs-label">TMB aprox.</span>
+                                <span class="rs-value" id="res-tmb">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IMC History -->
+                    <div class="card" id="imc-history-card" style="display:none;">
+                        <div class="card-header">
+                            <h3 class="card-title">📈 Histórico de IMC</h3>
+                            <button class="btn btn-ghost btn-sm" id="btn-clear-imc-history">Limpar</button>
+                        </div>
+                        <div class="imc-history-table" id="imc-history-table"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DIET VIEW ===== -->
+        <div class="view" id="view-dieta">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Plano de Dieta</h1>
+                    <p class="view-subtitle">Monte planos alimentares completos e detalhados para seus pacientes.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-ghost" id="btn-export-diet">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Exportar</span>
+                    </button>
+                    <button class="btn btn-primary" id="btn-open-meal-modal">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Nova Refeição</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Diet Patient selector + Day tabs -->
+            <div class="diet-controls">
+                <div class="diet-patient-select">
+                    <label class="form-label">Paciente</label>
+                    <select id="diet-paciente-select" class="form-input form-select">
+                        <option value="">— Todos —</option>
+                    </select>
+                </div>
+                <div class="day-tabs" id="day-tabs">
+                    <button class="day-tab active" data-day="all">Todos</button>
+                    <button class="day-tab" data-day="seg">Seg</button>
+                    <button class="day-tab" data-day="ter">Ter</button>
+                    <button class="day-tab" data-day="qua">Qua</button>
+                    <button class="day-tab" data-day="qui">Qui</button>
+                    <button class="day-tab" data-day="sex">Sex</button>
+                    <button class="day-tab" data-day="sab">Sáb</button>
+                    <button class="day-tab" data-day="dom">Dom</button>
+                </div>
+            </div>
+
+            <!-- Macro summary -->
+            <div class="macro-summary" id="macro-summary" style="display:none;">
+                <div class="macro-item cal"><span class="macro-val" id="m-cal">0</span><span class="macro-lbl">kcal</span></div>
+                <div class="macro-item prot"><span class="macro-val" id="m-prot">0</span><span class="macro-lbl">g proteína</span></div>
+                <div class="macro-item carb"><span class="macro-val" id="m-carb">0</span><span class="macro-lbl">g carboidrato</span></div>
+                <div class="macro-item fat"><span class="macro-val" id="m-fat">0</span><span class="macro-lbl">g gordura</span></div>
+            </div>
+
+            <!-- Macro chart -->
+            <div class="macro-chart-container" id="macro-chart-container" style="display:none;">
+                <canvas id="macro-chart" width="300" height="180"></canvas>
+                <div class="chart-legend" id="chart-legend"></div>
+            </div>
+
+            <!-- Meals list -->
+            <div class="meals-timeline" id="meals-timeline">
+                <div class="empty-state">
+                    <div class="empty-icon">🥗</div>
+                    <h3>Nenhuma refeição adicionada</h3>
+                    <p>Clique em "Nova Refeição" para montar o plano alimentar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meal Modal -->
+        <div class="modal-overlay" id="modal-refeicao">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Nova Refeição</h2>
+                    <button class="modal-close" id="modal-meal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="meal-paciente">Paciente</label>
+                            <select id="meal-paciente" class="form-input form-select">
+                                <option value="">— Geral —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meal-dia">Dia da semana</label>
+                            <select id="meal-dia" class="form-input form-select">
+                                <option value="all">Todos os dias</option>
+                                <option value="seg">Segunda-feira</option>
+                                <option value="ter">Terça-feira</option>
+                                <option value="qua">Quarta-feira</option>
+                                <option value="qui">Quinta-feira</option>
+                                <option value="sex">Sexta-feira</option>
+                                <option value="sab">Sábado</option>
+                                <option value="dom">Domingo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="meal-tipo">Refeição *</label>
+                            <select id="meal-tipo" class="form-input form-select">
+                                <option value="">Selecione...</option>
+                                <option value="☀️ Café da Manhã">☀️ Café da Manhã</option>
+                                <option value="🍎 Lanche da Manhã">🍎 Lanche da Manhã</option>
+                                <option value="🍛 Almoço">🍛 Almoço</option>
+                                <option value="🥤 Lanche da Tarde">🥤 Lanche da Tarde</option>
+                                <option value="🌙 Jantar">🌙 Jantar</option>
+                                <option value="🥛 Ceia">🥛 Ceia</option>
+                                <option value="🏋️ Pré-treino">🏋️ Pré-treino</option>
+                                <option value="💪 Pós-treino">💪 Pós-treino</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meal-horario">Horário</label>
+                            <input type="time" id="meal-horario" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="meal-alimentos">Alimentos / Descrição *</label>
+                        <textarea id="meal-alimentos" class="form-input form-textarea" rows="3" placeholder="Ex: 2 fatias de pão integral, 1 ovo mexido, 200ml de suco de laranja natural..."></textarea>
+                    </div>
+                    <div class="form-row form-row-4">
+                        <div class="form-group">
+                            <label class="form-label" for="meal-cal">Calorias</label>
+                            <input type="number" id="meal-cal" class="form-input" placeholder="350" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meal-prot">Proteína (g)</label>
+                            <input type="number" id="meal-prot" class="form-input" placeholder="25" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meal-carb">Carboidrato (g)</label>
+                            <input type="number" id="meal-carb" class="form-input" placeholder="40" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meal-fat">Gordura (g)</label>
+                            <input type="number" id="meal-fat" class="form-input" placeholder="12" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="meal-obs">Observações</label>
+                        <input type="text" id="meal-obs" class="form-input" placeholder="Ex: Substituir pão por tapioca se intolerância ao glúten">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btn-cancel-meal">Cancelar</button>
+                    <button class="btn btn-primary" id="btn-save-meal">Adicionar Refeição</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== WATER VIEW ===== -->
+        <div class="view" id="view-agua">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Controle de Água</h1>
+                    <p class="view-subtitle">Acompanhe a hidratação diária dos pacientes.</p>
+                </div>
+            </div>
+
+            <div class="water-layout">
+                <div class="card water-main-card">
+                    <div class="water-visual">
+                        <div class="water-bottle">
+                            <div class="water-fill" id="water-fill" style="height:0%"></div>
+                            <div class="water-percent" id="water-percent">0%</div>
+                        </div>
+                        <div class="water-info">
+                            <div class="water-current"><span id="water-current">0</span> ml</div>
+                            <div class="water-goal">Meta: <span id="water-goal-display">2000</span> ml</div>
+                            <div class="water-remaining" id="water-remaining">Faltam 2000 ml</div>
+                        </div>
+                    </div>
+
+                    <div class="water-controls">
+                        <div class="water-presets">
+                            <button class="water-btn" data-amount="150">🥛 150ml</button>
+                            <button class="water-btn" data-amount="200">💧 200ml</button>
+                            <button class="water-btn" data-amount="250">🥤 250ml</button>
+                            <button class="water-btn" data-amount="300">🫗 300ml</button>
+                            <button class="water-btn" data-amount="500">🍶 500ml</button>
+                        </div>
+                        <div class="water-custom">
+                            <input type="number" id="water-custom-amount" class="form-input" placeholder="Quantidade em ml" min="1">
+                            <button class="btn btn-primary" id="btn-add-water">Adicionar</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label" for="water-goal-input">Meta diária (ml)</label>
+                        <div class="water-custom">
+                            <input type="number" id="water-goal-input" class="form-input" placeholder="2000" min="500" max="10000" value="2000">
+                            <button class="btn btn-ghost" id="btn-set-water-goal">Definir</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-ghost btn-full" id="btn-reset-water" style="margin-top:8px">🔄 Resetar dia</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Registro de Hoje</h3>
+                    </div>
+                    <div class="water-log" id="water-log">
+                        <div class="empty-small">Nenhum registro ainda hoje.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== NOTES VIEW ===== -->
+        <div class="view" id="view-anotacoes">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Anotações</h1>
+                    <p class="view-subtitle">Suas notas rápidas e lembretes do consultório.</p>
+                </div>
+                <button class="btn btn-primary" id="btn-add-note">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Nova Nota</span>
+                </button>
+            </div>
+
+            <div class="notes-grid" id="notes-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <h3>Nenhuma anotação</h3>
+                    <p>Crie notas para organizar suas ideias e lembretes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note Modal -->
+        <div class="modal-overlay" id="modal-nota">
+            <div class="modal modal-sm">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-note-title">Nova Nota</h2>
+                    <button class="modal-close" id="modal-note-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="note-edit-id">
+                    <div class="form-group">
+                        <label class="form-label" for="note-title">Título</label>
+                        <input type="text" id="note-title" class="form-input" placeholder="Título da nota">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="note-content">Conteúdo</label>
+                        <textarea id="note-content" class="form-input form-textarea" rows="6" placeholder="Escreva sua nota..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cor</label>
+                        <div class="color-picker" id="note-color-picker">
+                            <button class="color-dot active" data-color="default" style="background: var(--surface-3)"></button>
+                            <button class="color-dot" data-color="green" style="background: #166534"></button>
+                            <button class="color-dot" data-color="blue" style="background: #1e3a5f"></button>
+                            <button class="color-dot" data-color="purple" style="background: #3b0764"></button>
+                            <button class="color-dot" data-color="red" style="background: #7f1d1d"></button>
+                            <button class="color-dot" data-color="amber" style="background: #78350f"></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btn-cancel-note">Cancelar</button>
+                    <button class="btn btn-primary" id="btn-save-note">Salvar Nota</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
