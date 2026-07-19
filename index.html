@@ -65,6 +65,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <span>Agenda</span>
             </button>
+            <button class="nav-item" data-view="financeiro" id="nav-financeiro">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                <span>Financeiro</span>
+            </button>
 
             <div class="nav-section-label">Sistema</div>
             <button class="nav-item" data-view="anotacoes" id="nav-anotacoes">
@@ -893,6 +897,194 @@
                 <div class="modal-footer">
                     <button class="btn btn-ghost" id="btn-cancel-agenda">Cancelar</button>
                     <button class="btn btn-primary" id="btn-save-agenda">Salvar Consulta</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== FINANCEIRO VIEW ===== -->
+        <div class="view" id="view-financeiro">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Controle Financeiro</h1>
+                    <p class="view-subtitle">Gerencie receitas, despesas e acompanhe a saúde financeira do consultório.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-ghost" id="btn-export-finance">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Exportar</span>
+                    </button>
+                    <button class="btn btn-primary" id="btn-open-transaction">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Nova Transação</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Month navigation -->
+            <div class="fin-month-nav">
+                <button class="btn btn-ghost btn-sm" id="fin-prev-month">← Anterior</button>
+                <span class="fin-month-label" id="fin-month-label">Julho 2026</span>
+                <button class="btn btn-ghost btn-sm" id="fin-next-month">Próximo →</button>
+            </div>
+
+            <!-- Finance Stats -->
+            <div class="fin-stats-grid">
+                <div class="fin-stat-card income">
+                    <div class="fin-stat-icon">📈</div>
+                    <div class="fin-stat-info">
+                        <span class="fin-stat-label">Receitas</span>
+                        <span class="fin-stat-value" id="fin-receitas">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="fin-stat-card expense">
+                    <div class="fin-stat-icon">📉</div>
+                    <div class="fin-stat-info">
+                        <span class="fin-stat-label">Despesas</span>
+                        <span class="fin-stat-value" id="fin-despesas">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="fin-stat-card profit">
+                    <div class="fin-stat-icon">💰</div>
+                    <div class="fin-stat-info">
+                        <span class="fin-stat-label">Lucro Líquido</span>
+                        <span class="fin-stat-value" id="fin-lucro">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="fin-stat-card count">
+                    <div class="fin-stat-icon">📋</div>
+                    <div class="fin-stat-info">
+                        <span class="fin-stat-label">Transações</span>
+                        <span class="fin-stat-value" id="fin-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fin-layout">
+                <!-- Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 Receitas × Despesas</h3>
+                    </div>
+                    <canvas id="fin-chart" width="600" height="260"></canvas>
+                </div>
+
+                <!-- Categories breakdown -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🏷️ Por Categoria</h3>
+                    </div>
+                    <div class="fin-categories" id="fin-categories">
+                        <div class="empty-small">Nenhuma transação registrada.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="fin-filters">
+                <div class="fin-filter-group">
+                    <select id="fin-filter-type" class="form-input form-select">
+                        <option value="all">Todos os tipos</option>
+                        <option value="receita">Receitas</option>
+                        <option value="despesa">Despesas</option>
+                    </select>
+                    <select id="fin-filter-category" class="form-input form-select">
+                        <option value="all">Todas categorias</option>
+                    </select>
+                    <select id="fin-filter-status" class="form-input form-select">
+                        <option value="all">Todos status</option>
+                        <option value="pago">Pago</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="atrasado">Atrasado</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Transaction list -->
+            <div class="fin-transactions" id="fin-transactions">
+                <div class="empty-state">
+                    <div class="empty-icon">💸</div>
+                    <h3>Nenhuma transação registrada</h3>
+                    <p>Clique em "Nova Transação" para começar o controle financeiro.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Modal -->
+        <div class="modal-overlay" id="modal-transacao">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-transaction-title">Nova Transação</h2>
+                    <button class="modal-close" id="modal-transaction-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="transaction-edit-id">
+                    <div class="fin-type-toggle">
+                        <button class="fin-type-btn active" data-type="receita" id="fin-type-receita">📈 Receita</button>
+                        <button class="fin-type-btn" data-type="despesa" id="fin-type-despesa">📉 Despesa</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tr-descricao">Descrição *</label>
+                            <input type="text" id="tr-descricao" class="form-input" placeholder="Ex: Consulta Maria Silva">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="tr-valor">Valor (R$) *</label>
+                            <input type="number" id="tr-valor" class="form-input" placeholder="150.00" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tr-data">Data *</label>
+                            <input type="date" id="tr-data" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="tr-categoria">Categoria</label>
+                            <select id="tr-categoria" class="form-input form-select">
+                                <optgroup label="Receitas">
+                                    <option value="Consulta">Consulta</option>
+                                    <option value="Retorno">Retorno</option>
+                                    <option value="Pacote">Pacote de consultas</option>
+                                    <option value="Avaliação">Avaliação corporal</option>
+                                    <option value="Plano alimentar">Plano alimentar</option>
+                                    <option value="Outra receita">Outra receita</option>
+                                </optgroup>
+                                <optgroup label="Despesas">
+                                    <option value="Aluguel">Aluguel</option>
+                                    <option value="Material">Material de escritório</option>
+                                    <option value="Software">Software / Assinaturas</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Equipamento">Equipamento</option>
+                                    <option value="Imposto">Impostos / Taxas</option>
+                                    <option value="Transporte">Transporte</option>
+                                    <option value="Outra despesa">Outra despesa</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tr-paciente">Paciente vinculado</label>
+                            <select id="tr-paciente" class="form-input form-select">
+                                <option value="">— Nenhum —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="tr-status">Status</label>
+                            <select id="tr-status" class="form-input form-select">
+                                <option value="pago">✅ Pago</option>
+                                <option value="pendente">⏳ Pendente</option>
+                                <option value="atrasado">🔴 Atrasado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tr-obs">Observações</label>
+                        <input type="text" id="tr-obs" class="form-input" placeholder="Ex: Pagamento via PIX">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btn-cancel-transaction">Cancelar</button>
+                    <button class="btn btn-primary" id="btn-save-transaction">Salvar Transação</button>
                 </div>
             </div>
         </div>

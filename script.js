@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewName === 'anotacoes') renderNotes();
         if (viewName === 'evolucao') refreshEvolucaoView();
         if (viewName === 'agenda') refreshAgendaView();
+        if (viewName === 'financeiro') refreshFinanceiroView();
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -330,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function refreshPatientSelects() {
-        const selects = ['imc-paciente-select', 'diet-paciente-select', 'meal-paciente', 'tpl-apply-patient', 'evolucao-paciente', 'ag-paciente'];
+        const selects = ['imc-paciente-select', 'diet-paciente-select', 'meal-paciente', 'tpl-apply-patient', 'evolucao-paciente', 'ag-paciente', 'tr-paciente'];
         selects.forEach(selId => {
             const sel = document.getElementById(selId);
             if (!sel) return;
@@ -1190,6 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!dateStr || !peso) { showToast('Preencha data e peso.', 'error'); return; }
             const p = patients.find(x => x.id === pid);
+            if (!p) { showToast('Paciente não encontrado.', 'error'); return; }
             
             weightRecords.push({ id: Date.now(), patientId: pid, patientName: p.nome, date: dateStr, weight: peso });
             weightRecords.sort((a,b) => a.date.localeCompare(b.date));
@@ -1431,6 +1433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!pid || !dataStr || !hora) { showToast('Preencha paciente, data e hora.', 'error'); return; }
             
             const p = patients.find(x => x.id === pid);
+            if (!p) { showToast('Paciente não encontrado.', 'error'); return; }
             const editId = document.getElementById('agenda-edit-id').value;
             
             const apt = {
@@ -1578,6 +1581,375 @@ document.addEventListener('DOMContentLoaded', () => {
     function refreshAgendaView() {
         renderCalendar();
     }
+
+    // ========== FINANCEIRO ==========
+    let transactions = Store.get('transactions');
+    let finDate = new Date();
+
+    const modalTransaction = document.getElementById('modal-transacao');
+    let currentTransactionType = 'receita';
+
+    const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+    function formatBRL(val) {
+        return 'R$ ' + val.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Type toggle
+    document.querySelectorAll('.fin-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.fin-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTransactionType = btn.dataset.type;
+        });
+    });
+
+    // Open modal
+    document.getElementById('btn-open-transaction').addEventListener('click', () => {
+        clearTransactionForm();
+        document.getElementById('modal-transaction-title').textContent = 'Nova Transação';
+        modalTransaction.classList.add('open');
+    });
+
+    document.getElementById('modal-transaction-close').addEventListener('click', () => modalTransaction.classList.remove('open'));
+    document.getElementById('btn-cancel-transaction').addEventListener('click', () => modalTransaction.classList.remove('open'));
+    modalTransaction.addEventListener('click', (e) => { if (e.target === modalTransaction) modalTransaction.classList.remove('open'); });
+
+    // Save
+    document.getElementById('btn-save-transaction').addEventListener('click', () => {
+        const desc = document.getElementById('tr-descricao').value.trim();
+        const valor = parseFloat(document.getElementById('tr-valor').value);
+        const data = document.getElementById('tr-data').value;
+
+        if (!desc || !valor || !data) {
+            showToast('Preencha descrição, valor e data.', 'error');
+            return;
+        }
+
+        const editId = document.getElementById('transaction-edit-id').value;
+        const pacSel = document.getElementById('tr-paciente');
+        const tr = {
+            id: editId ? parseInt(editId) : Date.now(),
+            type: currentTransactionType,
+            description: desc,
+            value: valor,
+            date: data,
+            category: document.getElementById('tr-categoria').value,
+            patientId: pacSel.value || '',
+            patientName: pacSel.value ? pacSel.options[pacSel.selectedIndex].text : '',
+            status: document.getElementById('tr-status').value,
+            obs: document.getElementById('tr-obs').value.trim(),
+            createdAt: editId ? (transactions.find(t => t.id === parseInt(editId))?.createdAt || new Date().toISOString()) : new Date().toISOString()
+        };
+
+        if (editId) {
+            const idx = transactions.findIndex(t => t.id === parseInt(editId));
+            if (idx >= 0) transactions[idx] = tr;
+        } else {
+            transactions.push(tr);
+        }
+
+        Store.set('transactions', transactions);
+        modalTransaction.classList.remove('open');
+        refreshFinanceiroView();
+        showToast(editId ? 'Transação atualizada!' : 'Transação registrada!', 'success');
+    });
+
+    function clearTransactionForm() {
+        document.getElementById('transaction-edit-id').value = '';
+        document.getElementById('tr-descricao').value = '';
+        document.getElementById('tr-valor').value = '';
+        document.getElementById('tr-data').value = new Date().toISOString().split('T')[0];
+        document.getElementById('tr-categoria').value = 'Consulta';
+        document.getElementById('tr-status').value = 'pago';
+        document.getElementById('tr-obs').value = '';
+        currentTransactionType = 'receita';
+        document.querySelectorAll('.fin-type-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('fin-type-receita').classList.add('active');
+    }
+
+    window.editTransaction = function(id) {
+        const tr = transactions.find(t => t.id === id);
+        if (!tr) return;
+        document.getElementById('transaction-edit-id').value = tr.id;
+        document.getElementById('tr-descricao').value = tr.description;
+        document.getElementById('tr-valor').value = tr.value;
+        document.getElementById('tr-data').value = tr.date;
+        document.getElementById('tr-categoria').value = tr.category;
+        document.getElementById('tr-status').value = tr.status;
+        document.getElementById('tr-obs').value = tr.obs || '';
+        const pacSel = document.getElementById('tr-paciente');
+        pacSel.value = tr.patientId || '';
+        currentTransactionType = tr.type;
+        document.querySelectorAll('.fin-type-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`fin-type-${tr.type}`).classList.add('active');
+        document.getElementById('modal-transaction-title').textContent = 'Editar Transação';
+        modalTransaction.classList.add('open');
+    };
+
+    window.deleteTransaction = function(id) {
+        if (!confirm('Excluir esta transação?')) return;
+        transactions = transactions.filter(t => t.id !== id);
+        Store.set('transactions', transactions);
+        refreshFinanceiroView();
+        showToast('Transação removida.', 'info');
+    };
+
+    // Month nav
+    document.getElementById('fin-prev-month').addEventListener('click', () => {
+        finDate.setMonth(finDate.getMonth() - 1);
+        refreshFinanceiroView();
+    });
+
+    document.getElementById('fin-next-month').addEventListener('click', () => {
+        finDate.setMonth(finDate.getMonth() + 1);
+        refreshFinanceiroView();
+    });
+
+    // Filters
+    ['fin-filter-type', 'fin-filter-category', 'fin-filter-status'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => renderTransactionList());
+    });
+
+    function getMonthTransactions() {
+        const y = finDate.getFullYear();
+        const m = finDate.getMonth();
+        return transactions.filter(t => {
+            const d = new Date(t.date);
+            return d.getFullYear() === y && d.getMonth() === m;
+        });
+    }
+
+    function refreshFinanceiroView() {
+        const monthly = getMonthTransactions();
+        const receitas = monthly.filter(t => t.type === 'receita').reduce((s, t) => s + t.value, 0);
+        const despesas = monthly.filter(t => t.type === 'despesa').reduce((s, t) => s + t.value, 0);
+        const lucro = receitas - despesas;
+
+        document.getElementById('fin-month-label').textContent = `${MONTHS_PT[finDate.getMonth()]} ${finDate.getFullYear()}`;
+        document.getElementById('fin-receitas').textContent = formatBRL(receitas);
+        document.getElementById('fin-despesas').textContent = formatBRL(despesas);
+        document.getElementById('fin-lucro').textContent = formatBRL(lucro);
+        document.getElementById('fin-count').textContent = monthly.length;
+
+        // Lucro color
+        const lucroEl = document.getElementById('fin-lucro');
+        lucroEl.style.color = lucro >= 0 ? 'var(--accent)' : 'var(--red)';
+
+        renderFinChart(monthly);
+        renderCategories(monthly);
+        populateCategoryFilter(monthly);
+        renderTransactionList();
+    }
+
+    function renderFinChart(monthly) {
+        const canvas = document.getElementById('fin-chart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const y = finDate.getFullYear();
+        const m = finDate.getMonth();
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+        // Aggregate by day
+        const incomeByDay = new Array(daysInMonth).fill(0);
+        const expenseByDay = new Array(daysInMonth).fill(0);
+        monthly.forEach(t => {
+            const day = new Date(t.date).getDate() - 1;
+            if (t.type === 'receita') incomeByDay[day] += t.value;
+            else expenseByDay[day] += t.value;
+        });
+
+        const maxVal = Math.max(...incomeByDay, ...expenseByDay, 100);
+        const padL = 60, padR = 20, padT = 20, padB = 40;
+        const chartW = W - padL - padR;
+        const chartH = H - padT - padB;
+        const barW = Math.max(2, (chartW / daysInMonth - 4) / 2);
+
+        const isDark = currentTheme === 'dark';
+        const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+
+        // Grid lines
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const yPos = padT + (chartH / 4) * i;
+            ctx.beginPath();
+            ctx.moveTo(padL, yPos);
+            ctx.lineTo(W - padR, yPos);
+            ctx.stroke();
+
+            ctx.fillStyle = textColor;
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'right';
+            const label = Math.round(maxVal - (maxVal / 4) * i);
+            ctx.fillText(label, padL - 8, yPos + 4);
+        }
+
+        // Bars
+        for (let d = 0; d < daysInMonth; d++) {
+            const x = padL + (d / daysInMonth) * chartW;
+            const incH = (incomeByDay[d] / maxVal) * chartH;
+            const expH = (expenseByDay[d] / maxVal) * chartH;
+
+            // Income bar
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.roundRect(x, padT + chartH - incH, barW, incH, [2, 2, 0, 0]);
+            ctx.fill();
+
+            // Expense bar
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.roundRect(x + barW + 1, padT + chartH - expH, barW, expH, [2, 2, 0, 0]);
+            ctx.fill();
+
+            // Day label (show every 5 days + 1st + last)
+            if (d === 0 || d === daysInMonth - 1 || (d + 1) % 5 === 0) {
+                ctx.fillStyle = textColor;
+                ctx.font = '10px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(d + 1, x + barW, H - padB + 16);
+            }
+        }
+
+        // Legend
+        ctx.font = '12px Inter';
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(padL, H - 14, 10, 10);
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'left';
+        ctx.fillText('Receitas', padL + 14, H - 5);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(padL + 90, H - 14, 10, 10);
+        ctx.fillStyle = textColor;
+        ctx.fillText('Despesas', padL + 104, H - 5);
+    }
+
+    function renderCategories(monthly) {
+        const catEl = document.getElementById('fin-categories');
+        if (monthly.length === 0) {
+            catEl.innerHTML = '<div class="empty-small">Nenhuma transação neste mês.</div>';
+            return;
+        }
+
+        const catMap = {};
+        monthly.forEach(t => {
+            const key = t.category || 'Outros';
+            if (!catMap[key]) catMap[key] = { income: 0, expense: 0 };
+            if (t.type === 'receita') catMap[key].income += t.value;
+            else catMap[key].expense += t.value;
+        });
+
+        const totalMax = Math.max(...Object.values(catMap).map(c => Math.max(c.income, c.expense)), 1);
+
+        catEl.innerHTML = Object.entries(catMap).sort((a, b) => (b[1].income + b[1].expense) - (a[1].income + a[1].expense)).map(([name, data]) => {
+            const isIncome = data.income > data.expense;
+            const value = isIncome ? data.income : data.expense;
+            const pct = (value / totalMax) * 100;
+            const cls = isIncome ? 'income' : 'expense';
+            return `
+                <div class="fin-cat-item">
+                    <div class="fin-cat-bar-wrap">
+                        <div class="fin-cat-header">
+                            <span class="fin-cat-name">${name}</span>
+                            <span class="fin-cat-value ${cls}">${isIncome ? '+' : '-'}${formatBRL(value)}</span>
+                        </div>
+                        <div class="fin-cat-bar">
+                            <div class="fin-cat-fill ${cls}" style="width:${pct}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function populateCategoryFilter(monthly) {
+        const sel = document.getElementById('fin-filter-category');
+        const current = sel.value;
+        const cats = [...new Set(monthly.map(t => t.category || 'Outros'))].sort();
+        sel.innerHTML = '<option value="all">Todas categorias</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        sel.value = current;
+    }
+
+    function renderTransactionList() {
+        const monthly = getMonthTransactions();
+        const filterType = document.getElementById('fin-filter-type').value;
+        const filterCat = document.getElementById('fin-filter-category').value;
+        const filterStatus = document.getElementById('fin-filter-status').value;
+
+        let filtered = monthly;
+        if (filterType !== 'all') filtered = filtered.filter(t => t.type === filterType);
+        if (filterCat !== 'all') filtered = filtered.filter(t => (t.category || 'Outros') === filterCat);
+        if (filterStatus !== 'all') filtered = filtered.filter(t => t.status === filterStatus);
+
+        const container = document.getElementById('fin-transactions');
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-icon">💸</div>
+                <h3>Nenhuma transação encontrada</h3>
+                <p>${monthly.length === 0 ? 'Clique em "Nova Transação" para começar.' : 'Tente alterar os filtros.'}</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).map((t, i) => {
+            const dateFmt = new Date(t.date).toLocaleDateString('pt-BR');
+            const icon = t.type === 'receita' ? '📈' : '📉';
+            const meta = [dateFmt, t.category, t.patientName].filter(Boolean).join(' • ');
+            return `
+                <div class="fin-tr-item" style="animation-delay:${i * 0.03}s">
+                    <div class="fin-tr-type ${t.type}">${icon}</div>
+                    <div class="fin-tr-info">
+                        <div class="fin-tr-desc">${t.description}</div>
+                        <div class="fin-tr-meta">${meta}</div>
+                    </div>
+                    <span class="fin-tr-value ${t.type}">${t.type === 'receita' ? '+' : '-'}${formatBRL(t.value)}</span>
+                    <span class="fin-tr-status ${t.status}">${t.status}</span>
+                    <div class="fin-tr-actions">
+                        <button class="fin-tr-btn" onclick="editTransaction(${t.id})">✏️</button>
+                        <button class="fin-tr-btn delete" onclick="deleteTransaction(${t.id})">🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Export
+    document.getElementById('btn-export-finance').addEventListener('click', () => {
+        const monthly = getMonthTransactions();
+        if (monthly.length === 0) { showToast('Nenhuma transação para exportar.', 'error'); return; }
+
+        const receitas = monthly.filter(t => t.type === 'receita').reduce((s, t) => s + t.value, 0);
+        const despesas = monthly.filter(t => t.type === 'despesa').reduce((s, t) => s + t.value, 0);
+
+        let txt = `=== RELATÓRIO FINANCEIRO ===\n`;
+        txt += `${MONTHS_PT[finDate.getMonth()]} ${finDate.getFullYear()}\n`;
+        txt += `${'='.repeat(40)}\n\n`;
+        txt += `RESUMO:\n`;
+        txt += `  Receitas:  ${formatBRL(receitas)}\n`;
+        txt += `  Despesas:  ${formatBRL(despesas)}\n`;
+        txt += `  Lucro:     ${formatBRL(receitas - despesas)}\n\n`;
+        txt += `${'─'.repeat(40)}\n`;
+        txt += `TRANSAÇÕES:\n\n`;
+
+        monthly.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(t => {
+            txt += `${new Date(t.date).toLocaleDateString('pt-BR')} | ${t.type === 'receita' ? '+' : '-'}${formatBRL(t.value)} | ${t.description} | ${t.category} | ${t.status}\n`;
+        });
+
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `financeiro_${finDate.getFullYear()}_${String(finDate.getMonth() + 1).padStart(2, '0')}.txt`;
+        a.click();
+        showToast('Relatório exportado!', 'success');
+    });
+
 
     // ========== INIT ==========
     applyTheme(currentTheme);
