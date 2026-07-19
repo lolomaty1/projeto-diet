@@ -490,6 +490,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteIMCEntry = function(date) {
         imcHistory = imcHistory.filter(h => h.date !== date);
         Store.set('imc_history', imcHistory);
+        imcCount = Math.max(0, imcCount - 1);
+        Store.set('imc_count', imcCount);
         renderIMCHistory();
     };
 
@@ -497,6 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Limpar todo o histórico de IMC?')) return;
         imcHistory = [];
         Store.set('imc_history', imcHistory);
+        imcCount = 0;
+        Store.set('imc_count', imcCount);
         renderIMCHistory();
         showToast('Histórico limpo.', 'info');
     });
