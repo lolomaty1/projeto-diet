@@ -2324,12 +2324,136 @@ html[data-theme="dark"] {
     --text-inverse: #0f172a;
 
     --border: #334155;
+    --border-focus: var(--accent);
+
+    --accent-light: rgba(16, 185, 129, 0.15);
+    --accent-bg: rgba(16, 185, 129, 0.12);
+    --blue-light: rgba(59, 130, 246, 0.15);
+    --blue-bg: rgba(59, 130, 246, 0.12);
+    --purple-light: rgba(139, 92, 246, 0.15);
+    --purple-bg: rgba(139, 92, 246, 0.12);
+    --cyan-light: rgba(6, 182, 212, 0.15);
+    --cyan-bg: rgba(6, 182, 212, 0.12);
+    --red-bg: rgba(239, 68, 68, 0.12);
+    --amber-bg: rgba(245, 158, 11, 0.12);
 
     --shadow-xs: 0 1px 2px rgba(0,0,0,0.3);
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 6px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
     --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.4);
 }
+
+/* Quick actions icons */
+html[data-theme="dark"] .quick-icon.green { background: rgba(16, 185, 129, 0.15); }
+html[data-theme="dark"] .quick-icon.blue { background: rgba(59, 130, 246, 0.15); }
+html[data-theme="dark"] .quick-icon.purple { background: rgba(139, 92, 246, 0.15); }
+html[data-theme="dark"] .quick-icon.cyan { background: rgba(6, 182, 212, 0.15); }
+
+/* Card tips */
+html[data-theme="dark"] .card-tips { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); }
+
+/* Form inputs */
+html[data-theme="dark"] .form-input:focus { background: #1e293b; }
+html[data-theme="dark"] .form-select option { background: #1e293b; color: #f1f5f9; }
+
+/* Divider */
+html[data-theme="dark"] .divider-or::before { background: #334155; }
+html[data-theme="dark"] .divider-or span { background: #1e293b; color: #64748b; }
+
+/* Note cards */
+html[data-theme="dark"] .note-card.color-green { background: rgba(22, 163, 74, 0.1); border-color: rgba(22, 163, 74, 0.25); }
+html[data-theme="dark"] .note-card.color-blue { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.25); }
+html[data-theme="dark"] .note-card.color-purple { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.25); }
+html[data-theme="dark"] .note-card.color-red { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); }
+html[data-theme="dark"] .note-card.color-amber { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.25); }
+
+/* Badges */
+html[data-theme="dark"] .badge-normal { background: rgba(34, 197, 94, 0.12); }
+html[data-theme="dark"] .badge-sobrepeso { background: rgba(234, 179, 8, 0.12); }
+html[data-theme="dark"] .badge-obesidade1 { background: rgba(249, 115, 22, 0.12); }
+html[data-theme="dark"] .badge-obesidade2 { background: rgba(239, 68, 68, 0.12); }
+html[data-theme="dark"] .badge-obesidade3 { background: rgba(239, 68, 68, 0.15); }
+html[data-theme="dark"] .badge-abaixo { background: rgba(59, 130, 246, 0.12); }
+
+/* IMC result and bar */
+html[data-theme="dark"] .imc-circle { color: var(--accent); }
+html[data-theme="dark"] .imc-bar-scale { background: #0f172a; }
+html[data-theme="dark"] .result-stat { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .imc-recommendation { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); }
+
+/* IMC history */
+html[data-theme="dark"] .imc-ht-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+html[data-theme="dark"] .imc-ht-row:hover { background: rgba(255,255,255,0.04); }
+
+/* Meal elements */
+html[data-theme="dark"] .meal-obs { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); }
+html[data-theme="dark"] .meal-patient-tag { background: #334155; }
+
+/* Macro chart and items */
+html[data-theme="dark"] .macro-item.cal { background: rgba(249, 115, 22, 0.1); }
+html[data-theme="dark"] .macro-item.prot { background: rgba(59, 130, 246, 0.1); }
+html[data-theme="dark"] .macro-item.carb { background: rgba(245, 158, 11, 0.1); }
+html[data-theme="dark"] .macro-item.fat { background: rgba(139, 92, 246, 0.1); }
+
+/* Recommended diets cards */
+html[data-theme="dark"] .rec-card { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .rec-card:hover { background: #1e293b; }
+
+/* Template modal */
+html[data-theme="dark"] .tpl-info { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .tpl-tip { background: rgba(16, 185, 129, 0.08); }
+html[data-theme="dark"] .tpl-meal { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .tpl-day-totals { background: #0f172a; border-color: #334155; }
+
+/* Water elements */
+html[data-theme="dark"] .water-bottle { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .water-btn { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .water-btn:hover { background: rgba(2, 132, 199, 0.1); }
+html[data-theme="dark"] .water-log-item { background: #0f172a; }
+
+/* Search bar */
+html[data-theme="dark"] .search-bar { background: #1e293b; border-color: #334155; }
+
+/* Patient card details */
+html[data-theme="dark"] .pc-details { background: #0f172a; }
+html[data-theme="dark"] .pc-alerts { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); }
+
+/* Modal overlay */
+html[data-theme="dark"] .modal-overlay { background: rgba(0, 0, 0, 0.7); }
+html[data-theme="dark"] .modal-header { border-color: #334155; }
+html[data-theme="dark"] .modal-footer { border-color: #334155; }
+
+/* Toast */
+html[data-theme="dark"] .toast { background: #1e293b; border-color: #334155; }
+
+/* Day tabs */
+html[data-theme="dark"] .day-tab { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .day-tab:hover { background: #1e293b; }
+html[data-theme="dark"] .tpl-day-tab { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .tpl-day-tab:hover { background: #1e293b; }
+
+/* Empty states */
+html[data-theme="dark"] .empty-small { color: #64748b; }
+
+/* Recent patient items */
+html[data-theme="dark"] .recent-patient-item:hover { background: rgba(255,255,255,0.04); }
+html[data-theme="dark"] .imc-hist-item:hover { background: rgba(255,255,255,0.04); }
+
+/* Sidebar overlay */
+html[data-theme="dark"] .sidebar-overlay.open { background: rgba(0,0,0,0.7); }
+
+/* Calendar dark */
+html[data-theme="dark"] .cal-day { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .cal-day:hover { background: #334155; }
+html[data-theme="dark"] .cal-day.empty { background: transparent; }
+
+/* Evolução chart */
+html[data-theme="dark"] .evo-chart-card canvas { background: #1e293b; }
+html[data-theme="dark"] .evo-stat { background: #0f172a; border-color: #334155; }
+
+/* Mobile header */
+html[data-theme="dark"] .mobile-header { background: #1e293b; border-color: #334155; }
+html[data-theme="dark"] .hamburger span { background: #f1f5f9; }
 
 body {
     transition: background-color 0.3s, color 0.3s;
