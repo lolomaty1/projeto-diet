@@ -434,6 +434,48 @@
                 </div>
             </div>
 
+            <!-- Recommended Diets Section -->
+            <div class="rec-diets-section">
+                <div class="rec-header">
+                    <div>
+                        <h3 class="rec-title">📚 Dietas Recomendadas</h3>
+                        <p class="rec-subtitle">Selecione um plano alimentar pronto baseado no objetivo do paciente. 7 dias completos com todas as refeições.</p>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" id="btn-toggle-rec" onclick="toggleRecDiets()">Mostrar ▼</button>
+                </div>
+                <div class="rec-cards-grid" id="rec-cards-grid" style="display:none;">
+                    <!-- Cards are rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Template Preview Modal -->
+            <div class="modal-overlay" id="modal-template">
+                <div class="modal modal-lg">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="tpl-modal-title">Dieta Recomendada</h2>
+                        <button class="modal-close" id="modal-template-close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tpl-info" id="tpl-info"></div>
+                        <div class="tpl-tips" id="tpl-tips"></div>
+                        <div class="tpl-day-tabs" id="tpl-day-tabs"></div>
+                        <div class="tpl-meals-list" id="tpl-meals-list"></div>
+                        <div class="tpl-day-totals" id="tpl-day-totals"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-ghost" id="btn-close-template">Fechar</button>
+                        <div class="tpl-apply-group">
+                            <select id="tpl-apply-patient" class="form-input form-select" style="width:auto;min-width:160px;">
+                                <option value="">— Paciente —</option>
+                            </select>
+                            <button class="btn btn-primary" id="btn-apply-template">
+                                <span>✨ Aplicar Plano Completo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Diet Patient selector + Day tabs -->
             <div class="diet-controls">
                 <div class="diet-patient-select">
@@ -683,6 +725,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
+    <script src="dietas-templates.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

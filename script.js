@@ -325,9 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function refreshPatientSelects() {
-        const selects = ['imc-paciente-select', 'diet-paciente-select', 'meal-paciente'];
+        const selects = ['imc-paciente-select', 'diet-paciente-select', 'meal-paciente', 'tpl-apply-patient'];
         selects.forEach(selId => {
             const sel = document.getElementById(selId);
+            if (!sel) return;
             const firstOption = sel.options[0].outerHTML;
             sel.innerHTML = firstOption + patients.map(p =>
                 `<option value="${p.id}">${p.nome}</option>`
@@ -773,6 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function refreshDietView() {
         refreshPatientSelects();
         renderMeals();
+        renderRecCards();
     }
 
     // ========== WATER TRACKER ==========
@@ -971,7 +973,178 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Nota removida.', 'info');
     };
 
+    // ========== RECOMMENDED DIETS ==========
+    let recDietsOpen = false;
+    let currentTemplate = null;
+    let currentTplDay = 'seg';
+
+    window.toggleRecDiets = function() {
+        recDietsOpen = !recDietsOpen;
+        const grid = document.getElementById('rec-cards-grid');
+        const btn = document.getElementById('btn-toggle-rec');
+        grid.style.display = recDietsOpen ? 'grid' : 'none';
+        btn.textContent = recDietsOpen ? 'Ocultar ▲' : 'Mostrar ▼';
+        if (recDietsOpen) renderRecCards();
+    };
+
+    function renderRecCards() {
+        const grid = document.getElementById('rec-cards-grid');
+        if (!grid || !window.DIET_TEMPLATES) return;
+
+        const templates = Object.values(DIET_TEMPLATES);
+        grid.innerHTML = templates.map((tpl, i) => `
+            <div class="rec-card" style="--card-accent: ${tpl.color}; background: ${tpl.colorBg}; animation-delay: ${i * 0.06}s" onclick="openTemplate('${tpl.id}')">
+                <div class="rec-card-icon">${tpl.icon}</div>
+                <div class="rec-card-name">${tpl.name}</div>
+                <div class="rec-card-cal">${tpl.dailyCal}</div>
+                <div class="rec-card-desc">${tpl.description}</div>
+                <div class="rec-card-footer">
+                    <span class="rec-card-macros">${tpl.macroSplit}</span>
+                    <button class="rec-card-btn" style="color:${tpl.color}">Ver plano →</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Template modal
+    const modalTemplate = document.getElementById('modal-template');
+    document.getElementById('modal-template-close').addEventListener('click', () => modalTemplate.classList.remove('open'));
+    document.getElementById('btn-close-template').addEventListener('click', () => modalTemplate.classList.remove('open'));
+    modalTemplate.addEventListener('click', (e) => { if (e.target === modalTemplate) modalTemplate.classList.remove('open'); });
+
+    window.openTemplate = function(id) {
+        if (!DIET_TEMPLATES[id]) return;
+        currentTemplate = DIET_TEMPLATES[id];
+        currentTplDay = 'seg';
+
+        document.getElementById('tpl-modal-title').textContent = `${currentTemplate.icon} ${currentTemplate.name}`;
+
+        // Info header
+        document.getElementById('tpl-info').innerHTML = `
+            <div class="tpl-info" style="background: ${currentTemplate.colorBg}">
+                <div class="tpl-info-icon">${currentTemplate.icon}</div>
+                <div class="tpl-info-text">
+                    <h4>${currentTemplate.name}</h4>
+                    <div class="tpl-info-meta">
+                        <span>🔥 ${currentTemplate.dailyCal}</span>
+                        <span>📊 ${currentTemplate.macroSplit}</span>
+                    </div>
+                    <p class="tpl-desc">${currentTemplate.description}</p>
+                </div>
+            </div>
+        `;
+
+        // Tips
+        document.getElementById('tpl-tips').innerHTML = currentTemplate.tips.map(t =>
+            `<span class="tpl-tip">${t}</span>`
+        ).join('');
+
+        // Day tabs
+        renderTplDayTabs();
+        renderTplDayMeals();
+
+        refreshPatientSelects();
+        modalTemplate.classList.add('open');
+    };
+
+    const dayNames = { seg: 'Segunda', ter: 'Terça', qua: 'Quarta', qui: 'Quinta', sex: 'Sexta', sab: 'Sábado', dom: 'Domingo' };
+
+    function renderTplDayTabs() {
+        const tabs = document.getElementById('tpl-day-tabs');
+        tabs.innerHTML = Object.entries(dayNames).map(([key, label]) =>
+            `<button class="tpl-day-tab ${key === currentTplDay ? 'active' : ''}" data-tplday="${key}">${label}</button>`
+        ).join('');
+
+        tabs.querySelectorAll('.tpl-day-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                currentTplDay = tab.dataset.tplday;
+                tabs.querySelectorAll('.tpl-day-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                renderTplDayMeals();
+            });
+        });
+    }
+
+    function renderTplDayMeals() {
+        if (!currentTemplate) return;
+        const dayMeals = currentTemplate.days[currentTplDay] || [];
+        const list = document.getElementById('tpl-meals-list');
+        const totalsEl = document.getElementById('tpl-day-totals');
+
+        list.innerHTML = dayMeals.map((m, i) => `
+            <div class="tpl-meal" style="animation-delay: ${i * 0.04}s">
+                <div class="tpl-meal-time">
+                    <span class="tpl-meal-hour">${m.horario}</span>
+                </div>
+                <div class="tpl-meal-body">
+                    <div class="tpl-meal-tipo">${m.tipo}</div>
+                    <div class="tpl-meal-alimentos">${m.alimentos}</div>
+                    <div class="tpl-meal-macros">
+                        ${m.calorias ? `<span class="tpl-macro-chip cal">🔥 ${m.calorias} kcal</span>` : ''}
+                        ${m.proteinas ? `<span class="tpl-macro-chip prot">💪 ${m.proteinas}g P</span>` : ''}
+                        ${m.carboidratos ? `<span class="tpl-macro-chip carb">🌾 ${m.carboidratos}g C</span>` : ''}
+                        ${m.gorduras ? `<span class="tpl-macro-chip fat">🫒 ${m.gorduras}g G</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Day totals
+        const totals = dayMeals.reduce((acc, m) => ({
+            cal: acc.cal + (m.calorias || 0),
+            prot: acc.prot + (m.proteinas || 0),
+            carb: acc.carb + (m.carboidratos || 0),
+            fat: acc.fat + (m.gorduras || 0)
+        }), { cal: 0, prot: 0, carb: 0, fat: 0 });
+
+        totalsEl.innerHTML = `
+            <div class="tpl-total-item"><span class="tpl-total-val" style="color:#f97316">${totals.cal}</span><span class="tpl-total-lbl">kcal</span></div>
+            <div class="tpl-total-item"><span class="tpl-total-val" style="color:#3b82f6">${totals.prot}g</span><span class="tpl-total-lbl">proteína</span></div>
+            <div class="tpl-total-item"><span class="tpl-total-val" style="color:#f59e0b">${totals.carb}g</span><span class="tpl-total-lbl">carboidrato</span></div>
+            <div class="tpl-total-item"><span class="tpl-total-val" style="color:#8b5cf6">${totals.fat}g</span><span class="tpl-total-lbl">gordura</span></div>
+        `;
+    }
+
+    // Apply template
+    document.getElementById('btn-apply-template').addEventListener('click', () => {
+        if (!currentTemplate) return;
+
+        const patientId = document.getElementById('tpl-apply-patient').value;
+        const patient = patientId ? patients.find(p => p.id === parseInt(patientId)) : null;
+        const patientName = patient ? patient.nome : 'Geral';
+
+        if (!confirm(`Aplicar o plano "${currentTemplate.name}" (7 dias completos) para ${patientName}?\n\nIsso adicionará todas as refeições ao seu plano de dieta.`)) return;
+
+        let count = 0;
+        Object.entries(currentTemplate.days).forEach(([day, dayMeals]) => {
+            dayMeals.forEach(m => {
+                meals.push({
+                    id: Date.now() + count,
+                    paciente: patientName,
+                    pacienteId: patientId ? parseInt(patientId) : null,
+                    dia: day,
+                    tipo: m.tipo,
+                    horario: m.horario,
+                    alimentos: m.alimentos,
+                    calorias: m.calorias || 0,
+                    proteinas: m.proteinas || 0,
+                    carboidratos: m.carboidratos || 0,
+                    gorduras: m.gorduras || 0,
+                    obs: `Plano: ${currentTemplate.name}`,
+                    createdAt: new Date().toISOString()
+                });
+                count++;
+            });
+        });
+
+        Store.set('meals', meals);
+        modalTemplate.classList.remove('open');
+        renderMeals();
+        showToast(`✅ ${count} refeições do plano "${currentTemplate.name}" aplicadas para ${patientName}!`, 'success');
+    });
+
     // ========== INIT ==========
     refreshDashboard();
     refreshPatientSelects();
+    renderRecCards();
 });
