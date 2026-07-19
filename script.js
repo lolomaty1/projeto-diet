@@ -2287,6 +2287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="history-header">
                     <span class="history-date">${formatDate(date)}</span>
                 </div>
+                <div class="exame-table-wrap">
                 <table class="exame-table">
                     <thead><tr><th>Exame</th><th>Resultado</th><th>Referência</th><th>Status</th><th>Ações</th></tr></thead>
                     <tbody>
@@ -2301,6 +2302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `).join('')}
                     </tbody>
                 </table>
+                </div>
             </div>
             `;
         }).join('');

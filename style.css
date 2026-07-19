@@ -2891,6 +2891,7 @@ html[data-theme="dark"] .fin-type-btn { background: #0f172a; }
         grid-template-columns: 1fr;
     }
     .fin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .medidas-layout, .exames-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -2938,6 +2939,76 @@ html[data-theme="dark"] .fin-type-btn { background: #0f172a; }
     .compras-list { max-height: 400px; gap: 12px; }
     .compras-cat { font-size: 14px; }
     .compras-item label { font-size: 13px; }
+
+    /* Modal Tabs */
+    .modal-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+    .modal-tabs::-webkit-scrollbar { display: none; }
+    .modal-tab {
+        padding: 6px 12px;
+        font-size: 13px;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    /* Achievements / Badges */
+    .achievements-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .badge-item { padding: 10px; gap: 10px; }
+    .badge-icon { width: 40px; height: 40px; font-size: 20px; }
+    .badge-title { font-size: 0.85rem; }
+    .badge-desc { 
+        white-space: normal;
+        font-size: 0.75rem;
+    }
+    .badge-meta { font-size: 0.7rem; }
+    .patient-badges { gap: 4px; }
+    .patient-badge-mini { font-size: 12px; padding: 1px 5px; }
+
+    /* Medidas & Exames */
+    .medidas-layout, .exames-layout { grid-template-columns: 1fr; gap: 16px; }
+    .history-item { padding: 12px; }
+    .history-header { margin-bottom: 8px; padding-bottom: 6px; }
+    .medida-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+    .medida-stat { padding: 6px; }
+    .medida-stat-lbl { font-size: 0.68rem; }
+    .medida-stat-val { font-size: 0.8rem; }
+
+    /* Exame table responsive */
+    .exame-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -12px;
+        padding: 0 12px;
+    }
+    .exame-table { min-width: 480px; }
+    .exame-table th, .exame-table td { 
+        padding: 6px; 
+        font-size: 0.78rem; 
+    }
+    .status-badge { font-size: 0.68rem; padding: 2px 6px; }
+
+    /* Diet header buttons - wrap with 2 per row */
+    .header-actions {
+        flex-wrap: wrap;
+    }
+    .header-actions .btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    .header-actions .btn span {
+        font-size: 11px;
+    }
 }
 
 @media (max-width: 400px) {
@@ -2953,6 +3024,24 @@ html[data-theme="dark"] .fin-type-btn { background: #0f172a; }
     /* Evolução 400px */
     .evo-stats-grid { grid-template-columns: 1fr 1fr 1fr; }
     .evo-stat-value { font-size: 16px; }
+
+    /* Medida grid stacks at 400px */
+    .medida-grid { grid-template-columns: repeat(2, 1fr); }
+
+    /* Badges ultra-small */
+    .badge-item { padding: 8px; gap: 8px; }
+    .badge-icon { width: 36px; height: 36px; font-size: 18px; }
+    .badge-title { font-size: 0.8rem; }
+
+    /* Diet buttons stack fully */
+    .header-actions .btn { flex: 1 1 45%; min-width: 0; }
+
+    /* Anamnese form groups */
+    .tab-content .form-row { grid-template-columns: 1fr; }
+
+    /* History items */
+    .history-item { padding: 10px; }
+    .history-date { font-size: 0.85rem; }
 }
 
 /* ========================================
