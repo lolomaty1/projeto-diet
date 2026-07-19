@@ -3,7 +3,7 @@
    7 dias completos para cada objetivo
    ======================================== */
 
-const DIET_TEMPLATES = {
+window.DIET_TEMPLATES = {
 
     // ═══════════════════════════════════════
     // 🔥 EMAGRECIMENTO — ~1400-1600 kcal/dia
