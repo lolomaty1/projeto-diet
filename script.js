@@ -2103,28 +2103,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (diff < 0) trend = '<span class="trend-down">↓</span>';
                     else trend = '<span class="trend-eq">=</span>';
                 }
-                return val ? \`<div class="medida-stat"><span class="medida-stat-lbl">\${lbl}</span><span class="medida-stat-val">\${val} \${trend}</span></div>\` : '';
+                return val ? `<div class="medida-stat"><span class="medida-stat-lbl">${lbl}</span><span class="medida-stat-val">${val} ${trend}</span></div>` : '';
             };
             
-            return \`
+            return `
             <div class="history-item">
                 <div class="history-header">
-                    <span class="history-date">\${formatDate(m.date)}</span>
-                    <div class="history-actions"><button onclick="deleteMedida(\${m.id})">Remover</button></div>
+                    <span class="history-date">${formatDate(m.date)}</span>
+                    <div class="history-actions"><button onclick="deleteMedida(${m.id})">Remover</button></div>
                 </div>
                 <div class="medida-grid">
-                    \${renderStat('Peso', m.peso, 'peso')}
-                    \${renderStat('Cintura', m.cintura, 'cintura')}
-                    \${renderStat('Quadril', m.quadril, 'quadril')}
-                    \${renderStat('Braço D', m.bracoD, 'bracoD')}
-                    \${renderStat('Braço E', m.bracoE, 'bracoE')}
-                    \${renderStat('Coxa D', m.coxaD, 'coxaD')}
-                    \${renderStat('Coxa E', m.coxaE, 'coxaE')}
-                    \${renderStat('Panturrilha', m.panturrilha, 'panturrilha')}
-                    \${renderStat('Peitoral', m.peitoral, 'peitoral')}
+                    ${renderStat('Peso', m.peso, 'peso')}
+                    ${renderStat('Cintura', m.cintura, 'cintura')}
+                    ${renderStat('Quadril', m.quadril, 'quadril')}
+                    ${renderStat('Braço D', m.bracoD, 'bracoD')}
+                    ${renderStat('Braço E', m.bracoE, 'bracoE')}
+                    ${renderStat('Coxa D', m.coxaD, 'coxaD')}
+                    ${renderStat('Coxa E', m.coxaE, 'coxaE')}
+                    ${renderStat('Panturrilha', m.panturrilha, 'panturrilha')}
+                    ${renderStat('Peitoral', m.peitoral, 'peitoral')}
                 </div>
             </div>
-            \`;
+            `;
         }).join('');
     }
     
@@ -2217,7 +2217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ex-tipo').addEventListener('change', (e) => {
         const t = e.target.value;
         if (examRefs[t]) {
-            document.getElementById('ex-ref').value = \`\${examRefs[t].min} - \${examRefs[t].max} \${examRefs[t].unit}\`;
+            document.getElementById('ex-ref').value = `${examRefs[t].min} - ${examRefs[t].max} ${examRefs[t].unit}`;
         } else {
             document.getElementById('ex-ref').value = '';
         }
@@ -2282,27 +2282,27 @@ document.addEventListener('DOMContentLoaded', () => {
         
         historyContainer.innerHTML = Object.keys(grouped).sort((a,b) => new Date(b)-new Date(a)).map(date => {
             const exms = grouped[date];
-            return \`
+            return `
             <div class="history-item">
                 <div class="history-header">
-                    <span class="history-date">\${formatDate(date)}</span>
+                    <span class="history-date">${formatDate(date)}</span>
                 </div>
                 <table class="exame-table">
                     <thead><tr><th>Exame</th><th>Resultado</th><th>Referência</th><th>Status</th><th>Ações</th></tr></thead>
                     <tbody>
-                        \${exms.map(e => \`
+                        ${exms.map(e => `
                         <tr>
-                            <td>\${e.examType}</td>
-                            <td><strong>\${e.value} \${e.unit}</strong></td>
-                            <td><span style="font-size:0.75rem;color:var(--text-muted)">\${e.refMin}-\${e.refMax}</span></td>
-                            <td><span class="status-badge status-\${e.status}">\${e.status}</span></td>
-                            <td><button onclick="deleteExame(\${e.id})" style="background:none;border:none;color:var(--red);cursor:pointer;">✕</button></td>
+                            <td>${e.examType}</td>
+                            <td><strong>${e.value} ${e.unit}</strong></td>
+                            <td><span style="font-size:0.75rem;color:var(--text-muted)">${e.refMin}-${e.refMax}</span></td>
+                            <td><span class="status-badge status-${e.status}">${e.status}</span></td>
+                            <td><button onclick="deleteExame(${e.id})" style="background:none;border:none;color:var(--red);cursor:pointer;">✕</button></td>
                         </tr>
-                        \`).join('')}
+                        `).join('')}
                     </tbody>
                 </table>
             </div>
-            \`;
+            `;
         }).join('');
     }
     
@@ -2328,16 +2328,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const dayLabels = { all: 'Todos os dias', seg: 'Segunda', ter: 'Terça', qua: 'Quarta', qui: 'Quinta', sex: 'Sexta', sab: 'Sábado', dom: 'Domingo' };
         
         const printDiv = document.getElementById('print-diet');
-        let html = \`
+        let html = `
             <div class="print-header">
                 <div class="print-title">Plano Alimentar Individualizado</div>
                 <div class="print-subtitle">Nutricionista - Lo Diet Pro</div>
             </div>
             <div class="print-patient-info">
-                <div><strong>Paciente:</strong> \${pt ? pt.nome : 'Geral'}</div>
-                <div><strong>Data:</strong> \${new Date().toLocaleDateString('pt-BR')}</div>
+                <div><strong>Paciente:</strong> ${pt ? pt.nome : 'Geral'}</div>
+                <div><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</div>
             </div>
-        \`;
+        `;
         
         const grouped = {};
         meals.forEach(m => {
@@ -2348,29 +2348,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         Object.keys(grouped).forEach(day => {
-            html += \`<div class="print-day">\`;
-            html += \`<div class="print-day-title">\${dayLabels[day] || day}</div>\`;
+            html += `<div class="print-day">`;
+            html += `<div class="print-day-title">${dayLabels[day] || day}</div>`;
             grouped[day].sort((a, b) => (a.horario || '').localeCompare(b.horario || '')).forEach(m => {
-                html += \`
+                html += `
                 <div class="print-meal">
                     <div class="print-meal-header">
-                        <span>\${m.tipo}</span>
-                        \${m.horario ? \`<span class="print-meal-time">(\${m.horario})</span>\` : ''}
+                        <span>${m.tipo}</span>
+                        ${m.horario ? `<span class="print-meal-time">(${m.horario})</span>` : ''}
                     </div>
-                    <div class="print-meal-foods">\${m.alimentos}</div>
-                    \`;
+                    <div class="print-meal-foods">${m.alimentos}</div>
+                    `;
                 if(m.calorias || m.proteinas) {
-                    html += \`<div class="print-meal-macros">\${m.calorias} kcal | \${m.proteinas}g P | \${m.carboidratos}g C | \${m.gorduras}g G</div>\`;
+                    html += `<div class="print-meal-macros">${m.calorias} kcal | ${m.proteinas}g P | ${m.carboidratos}g C | ${m.gorduras}g G</div>`;
                 }
                 if(m.obs) {
-                    html += \`<div class="print-meal-obs">Obs: \${m.obs}</div>\`;
+                    html += `<div class="print-meal-obs">Obs: ${m.obs}</div>`;
                 }
-                html += \`</div>\`;
+                html += `</div>`;
             });
-            html += \`</div>\`;
+            html += `</div>`;
         });
         
-        html += \`<div class="print-footer">Este plano é individual e intransferível.</div>\`;
+        html += `<div class="print-footer">Este plano é individual e intransferível.</div>`;
         
         printDiv.innerHTML = html;
         window.print();
@@ -2395,11 +2395,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         Object.keys(grouped).forEach(day => {
-            text += \`*--- \${(dayLabels[day] || day).toUpperCase()} ---*\n\n\`;
+            text += `*--- ${(dayLabels[day] || day).toUpperCase()} ---*\n\n`;
             grouped[day].sort((a, b) => (a.horario || '').localeCompare(b.horario || '')).forEach(m => {
-                text += \`🕒 *\${m.tipo}* \${m.horario ? '('+m.horario+')' : ''}\n\`;
-                text += \`\${m.alimentos}\n\`;
-                if(m.obs) text += \`📌 _Obs: \${m.obs}_\n\`;
+                text += `🕒 *${m.tipo}* ${m.horario ? '('+m.horario+')' : ''}\n`;
+                text += `${m.alimentos}\n`;
+                if(m.obs) text += `📌 _Obs: ${m.obs}_\n`;
                 text += '\n';
             });
         });
@@ -2440,7 +2440,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     date: new Date().toISOString()
                 });
                 earned = true;
-                showToast(\`🏆 Conquista Desbloqueada: \${title} (\${pt.nome})\`, 'success');
+                showToast(`🏆 Conquista Desbloqueada: ${title} (${pt.nome})`, 'success');
             }
         };
 
@@ -2475,16 +2475,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         container.innerHTML = recent.map(a => {
             const def = badgeDefs[a.title] || { icon: '🏆', desc: 'Conquista especial' };
-            return \`
+            return `
             <div class="badge-item">
-                <div class="badge-icon">\${def.icon}</div>
+                <div class="badge-icon">${def.icon}</div>
                 <div class="badge-info">
-                    <div class="badge-title">\${a.title}</div>
-                    <div class="badge-desc">\${def.desc}</div>
-                    <div class="badge-meta">\${a.patientName} · \${formatDate(a.date)}</div>
+                    <div class="badge-title">${a.title}</div>
+                    <div class="badge-desc">${def.desc}</div>
+                    <div class="badge-meta">${a.patientName} · ${formatDate(a.date)}</div>
                 </div>
             </div>
-            \`;
+            `;
         }).join('');
     }
 
