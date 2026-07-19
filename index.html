@@ -55,6 +55,17 @@
                 <span>Controle de Água</span>
             </button>
 
+            <button class="nav-item" data-view="evolucao" id="nav-evolucao">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+                <span>Evolução</span>
+            </button>
+
+            <div class="nav-section-label">Gestão</div>
+            <button class="nav-item" data-view="agenda" id="nav-agenda">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Agenda</span>
+            </button>
+
             <div class="nav-section-label">Sistema</div>
             <button class="nav-item" data-view="anotacoes" id="nav-anotacoes">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -63,6 +74,10 @@
         </nav>
 
         <div class="sidebar-footer">
+            <button class="theme-toggle-btn" id="theme-toggle" aria-label="Alternar tema">
+                <span class="theme-icon" id="theme-icon">🌙</span>
+                <span class="theme-text">Modo Escuro</span>
+            </button>
             <div class="user-card">
                 <div class="user-avatar">N</div>
                 <div class="user-info">
@@ -423,6 +438,9 @@
                     <p class="view-subtitle">Monte planos alimentares completos e detalhados para seus pacientes.</p>
                 </div>
                 <div class="header-actions">
+                    <button class="btn btn-ghost" id="btn-lista-compras">
+                        <span>🛒 Lista de Compras</span>
+                    </button>
                     <button class="btn btn-ghost" id="btn-export-diet">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <span>Exportar</span>
@@ -662,6 +680,93 @@
             </div>
         </div>
 
+        <!-- ===== EVOLUCAO VIEW ===== -->
+        <div class="view" id="view-evolucao">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Evolução de Peso</h1>
+                    <p class="view-subtitle">Acompanhe a progressão de peso dos pacientes ao longo do tempo.</p>
+                </div>
+            </div>
+
+            <div class="evolucao-layout">
+                <div class="card">
+                    <div class="form-group">
+                        <label class="form-label" for="evolucao-paciente">Paciente</label>
+                        <select id="evolucao-paciente" class="form-input form-select">
+                            <option value="">— Selecione um paciente —</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="evo-data">Data</label>
+                            <input type="date" id="evo-data" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="evo-peso">Peso (kg)</label>
+                            <input type="number" id="evo-peso" class="form-input" step="0.1" placeholder="Ex: 70.5">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="btn-add-peso">Registrar Peso</button>
+
+                    <div class="evo-stats" id="evo-stats" style="display:none; margin-top:20px;">
+                        <div class="evo-stat"><span class="evo-stat-lbl">Mínimo</span><span class="evo-stat-val" id="evo-stat-min">—</span></div>
+                        <div class="evo-stat"><span class="evo-stat-lbl">Máximo</span><span class="evo-stat-val" id="evo-stat-max">—</span></div>
+                        <div class="evo-stat"><span class="evo-stat-lbl">Média</span><span class="evo-stat-val" id="evo-stat-avg">—</span></div>
+                    </div>
+                </div>
+
+                <div class="evo-main">
+                    <div class="card" style="margin-bottom:20px">
+                        <h3 class="card-title" style="margin-bottom:16px;">📈 Gráfico de Evolução</h3>
+                        <canvas id="evo-chart" width="600" height="300" style="width:100%; height:auto;"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title" style="margin-bottom:16px;">📋 Histórico</h3>
+                        <div class="evo-history" id="evo-history">
+                            <div class="empty-small">Selecione um paciente para ver o histórico.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== AGENDA VIEW ===== -->
+        <div class="view" id="view-agenda">
+            <div class="view-header">
+                <div>
+                    <h1 class="view-title">Agenda de Consultas</h1>
+                    <p class="view-subtitle">Gerencie seus horários e acompanhe as próximas consultas.</p>
+                </div>
+                <button class="btn btn-primary" id="btn-open-agenda">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Nova Consulta</span>
+                </button>
+            </div>
+
+            <div class="agenda-layout">
+                <div class="card agenda-calendar-card">
+                    <div class="calendar-header">
+                        <button class="btn btn-ghost btn-sm" id="btn-cal-prev">❮</button>
+                        <h3 class="calendar-month-year" id="cal-month-year">Mês Ano</h3>
+                        <button class="btn btn-ghost btn-sm" id="btn-cal-next">❯</button>
+                    </div>
+                    <div class="calendar-grid-header">
+                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Days generated by JS -->
+                    </div>
+                </div>
+
+                <div class="card agenda-list-card">
+                    <h3 class="card-title" style="margin-bottom:16px;">Próximas Consultas (7 dias)</h3>
+                    <div class="agenda-upcoming-list" id="agenda-upcoming-list"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== NOTES VIEW ===== -->
         <div class="view" id="view-anotacoes">
             <div class="view-header">
@@ -716,6 +821,78 @@
                 <div class="modal-footer">
                     <button class="btn btn-ghost" id="btn-cancel-note">Cancelar</button>
                     <button class="btn btn-primary" id="btn-save-note">Salvar Nota</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista Compras Modal -->
+        <div class="modal-overlay" id="modal-lista-compras">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Lista de Compras</h2>
+                    <button class="modal-close" id="modal-compras-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="compras-list" id="compras-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btn-close-compras">Fechar</button>
+                    <button class="btn btn-primary" id="btn-copy-compras">Copiar Lista</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agenda Modal -->
+        <div class="modal-overlay" id="modal-agenda">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="agenda-modal-title">Nova Consulta</h2>
+                    <button class="modal-close" id="modal-agenda-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="agenda-edit-id">
+                    <div class="form-group">
+                        <label class="form-label" for="ag-paciente">Paciente</label>
+                        <select id="ag-paciente" class="form-input form-select">
+                            <option value="">— Selecione —</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="ag-data">Data</label>
+                            <input type="date" id="ag-data" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="ag-hora">Hora</label>
+                            <input type="time" id="ag-hora" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="ag-tipo">Tipo</label>
+                            <select id="ag-tipo" class="form-input form-select">
+                                <option value="Primeira consulta">Primeira consulta</option>
+                                <option value="Retorno">Retorno</option>
+                                <option value="Avaliação">Avaliação</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="ag-status">Status</label>
+                            <select id="ag-status" class="form-input form-select">
+                                <option value="Confirmada">Confirmada</option>
+                                <option value="Remarcada">Remarcada</option>
+                                <option value="Faltou">Faltou</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="ag-obs">Observações</label>
+                        <input type="text" id="ag-obs" class="form-input" placeholder="Ex: Trazer exames">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btn-cancel-agenda">Cancelar</button>
+                    <button class="btn btn-primary" id="btn-save-agenda">Salvar Consulta</button>
                 </div>
             </div>
         </div>

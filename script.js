@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let waterLog = Store.get('water_log');
     let waterGoal = Store.get('water_goal', 2000);
     let imcCount = Store.get('imc_count', 0);
+    let weightRecords = Store.get('weight_records');
+    let appointments = Store.get('appointments');
+    let currentTheme = Store.get('theme', 'light');
 
     // ========== NAVIGATION ==========
     const sidebar = document.getElementById('sidebar');
@@ -69,6 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewName === 'dieta') refreshDietView();
         if (viewName === 'agua') refreshWaterView();
         if (viewName === 'anotacoes') renderNotes();
+        if (viewName === 'evolucao') refreshEvolucaoView();
+        if (viewName === 'agenda') refreshAgendaView();
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -325,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function refreshPatientSelects() {
-        const selects = ['imc-paciente-select', 'diet-paciente-select', 'meal-paciente', 'tpl-apply-patient'];
+        const selects = ['imc-paciente-select', 'diet-paciente-select', 'meal-paciente', 'tpl-apply-patient', 'evolucao-paciente', 'ag-paciente'];
         selects.forEach(selId => {
             const sel = document.getElementById(selId);
             if (!sel) return;
@@ -1147,7 +1152,435 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(`✅ ${count} refeições do plano "${currentTemplate.name}" aplicadas para ${patientName}!`, 'success');
     });
 
+    // ========== DARK MODE ==========
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            htmlEl.setAttribute('data-theme', 'dark');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            htmlEl.removeAttribute('data-theme');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    }
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            Store.set('theme', currentTheme);
+            applyTheme(currentTheme);
+        });
+    }
+
+    // ========== EVOLUÇÃO ==========
+    const evoPaciente = document.getElementById('evolucao-paciente');
+    if (evoPaciente) {
+        evoPaciente.addEventListener('change', renderEvolucaoData);
+    }
+    const btnAddPeso = document.getElementById('btn-add-peso');
+    if (btnAddPeso) {
+        btnAddPeso.addEventListener('click', () => {
+            const pid = parseInt(evoPaciente.value);
+            if (!pid) { showToast('Selecione um paciente.', 'error'); return; }
+            const dateStr = document.getElementById('evo-data').value;
+            const peso = parseFloat(document.getElementById('evo-peso').value);
+            
+            if (!dateStr || !peso) { showToast('Preencha data e peso.', 'error'); return; }
+            const p = patients.find(x => x.id === pid);
+            
+            weightRecords.push({ id: Date.now(), patientId: pid, patientName: p.nome, date: dateStr, weight: peso });
+            weightRecords.sort((a,b) => a.date.localeCompare(b.date));
+            Store.set('weight_records', weightRecords);
+            
+            document.getElementById('evo-data').value = '';
+            document.getElementById('evo-peso').value = '';
+            showToast('Peso registrado.', 'success');
+            renderEvolucaoData();
+        });
+    }
+
+    function renderEvolucaoData() {
+        const pid = parseInt(document.getElementById('evolucao-paciente').value);
+        const histContainer = document.getElementById('evo-history');
+        const statsEl = document.getElementById('evo-stats');
+        
+        if (!pid) {
+            histContainer.innerHTML = '<div class="empty-small">Selecione um paciente para ver o histórico.</div>';
+            statsEl.style.display = 'none';
+            drawEvoChart([]);
+            return;
+        }
+
+        let records = weightRecords.filter(r => r.patientId === pid);
+        if (records.length === 0) {
+            histContainer.innerHTML = '<div class="empty-small">Nenhum registro para este paciente.</div>';
+            statsEl.style.display = 'none';
+            drawEvoChart([]);
+            return;
+        }
+
+        statsEl.style.display = 'flex';
+        const weights = records.map(r => r.weight);
+        document.getElementById('evo-stat-min').textContent = Math.min(...weights).toFixed(1) + ' kg';
+        document.getElementById('evo-stat-max').textContent = Math.max(...weights).toFixed(1) + ' kg';
+        const avg = weights.reduce((a,b) => a + b, 0) / weights.length;
+        document.getElementById('evo-stat-avg').textContent = avg.toFixed(1) + ' kg';
+
+        histContainer.innerHTML = records.slice().reverse().map(r => `
+            <div class="evo-hist-item">
+                <div class="evo-hist-left">
+                    <span class="evo-hist-date">${formatDate(r.date)}</span>
+                    <span class="evo-hist-peso">${r.weight.toFixed(1)} kg</span>
+                </div>
+                <button class="evo-hist-del" onclick="deleteWeightRecord(${r.id})">✕</button>
+            </div>
+        `).join('');
+
+        drawEvoChart(records);
+    }
+
+    window.deleteWeightRecord = function(id) {
+        weightRecords = weightRecords.filter(r => r.id !== id);
+        Store.set('weight_records', weightRecords);
+        renderEvolucaoData();
+    };
+
+    function drawEvoChart(records) {
+        const canvas = document.getElementById('evo-chart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0,0,W,H);
+        
+        if (records.length < 2) {
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '14px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText('Adicione pelo menos 2 registros para ver o gráfico.', W/2, H/2);
+            return;
+        }
+
+        const weights = records.map(r => r.weight);
+        const minW = Math.min(...weights) - 2;
+        const maxW = Math.max(...weights) + 2;
+        const range = maxW - minW;
+        
+        const padX = 40, padY = 30;
+        const wSpace = (W - padX*2) / (records.length - 1);
+        
+        ctx.beginPath();
+        records.forEach((r, i) => {
+            const x = padX + i * wSpace;
+            const y = H - padY - ((r.weight - minW) / range) * (H - padY*2);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        records.forEach((r, i) => {
+            const x = padX + i * wSpace;
+            const y = H - padY - ((r.weight - minW) / range) * (H - padY*2);
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI*2);
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            ctx.fillStyle = currentTheme === 'dark' ? '#f1f5f9' : '#0f172a';
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(r.weight.toFixed(1), x, y - 10);
+            
+            const dateStr = new Date(r.date).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+            ctx.fillText(dateStr, x, H - 10);
+        });
+    }
+
+    function refreshEvolucaoView() {
+        refreshPatientSelects();
+        renderEvolucaoData();
+    }
+
+    // ========== LISTA DE COMPRAS ==========
+    const modalCompras = document.getElementById('modal-lista-compras');
+    const btnListaCompras = document.getElementById('btn-lista-compras');
+    if (btnListaCompras) {
+        btnListaCompras.addEventListener('click', () => {
+            const listEl = document.getElementById('compras-list');
+            let filtered = meals;
+            if (currentDietPatientFilter) {
+                filtered = filtered.filter(m => m.pacienteId === parseInt(currentDietPatientFilter));
+            }
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="empty-small">Nenhuma refeição encontrada para gerar lista.</div>';
+            } else {
+                let allItems = [];
+                filtered.forEach(m => {
+                    const lines = m.alimentos.split('\n');
+                    lines.forEach(l => {
+                        let text = l.trim();
+                        if (text.startsWith('-') || text.startsWith('•')) text = text.substring(1).trim();
+                        if (text) allItems.push(text);
+                    });
+                });
+                
+                // Categorize
+                const categories = {
+                    '🥩 Proteínas': ['frango', 'carne', 'ovo', 'ovos', 'peixe', 'salmão', 'tilápia', 'atum', 'bife', 'patinho', 'whey'],
+                    '🥬 Vegetais & Folhas': ['alface', 'tomate', 'cebola', 'alho', 'cenoura', 'brócolis', 'couve', 'espinafre', 'abobrinha', 'batata'],
+                    '🍎 Frutas': ['banana', 'maçã', 'laranja', 'limão', 'mamão', 'uva', 'morango', 'abacate', 'melancia'],
+                    '🌾 Cereais & Grãos': ['arroz', 'feijão', 'aveia', 'pão', 'macarrão', 'tapioca', 'grão de bico', 'milho', 'lentilha', 'quinoa'],
+                    '🥛 Laticínios': ['leite', 'queijo', 'iogurte', 'manteiga', 'requeijão', 'creme de leite'],
+                    '🧴 Outros': []
+                };
+                
+                let categorized = {};
+                Object.keys(categories).forEach(c => categorized[c] = []);
+                
+                allItems.forEach(item => {
+                    let cat = '🧴 Outros';
+                    const lower = item.toLowerCase();
+                    for (const [cName, keywords] of Object.entries(categories)) {
+                        if (cName === '🧴 Outros') continue;
+                        if (keywords.some(kw => lower.includes(kw))) {
+                            cat = cName;
+                            break;
+                        }
+                    }
+                    categorized[cat].push(item);
+                });
+                
+                let html = '';
+                let idCount = 0;
+                Object.keys(categorized).forEach(c => {
+                    let items = [...new Set(categorized[c])];
+                    if (items.length > 0) {
+                        html += `<div class="compras-cat">${c}</div>`;
+                        items.forEach(it => {
+                            idCount++;
+                            html += `<div class="compras-item"><input type="checkbox" id="ci-${idCount}"><label for="ci-${idCount}">${it}</label></div>`;
+                        });
+                    }
+                });
+                listEl.innerHTML = html;
+            }
+            modalCompras.classList.add('open');
+        });
+    }
+
+    if (document.getElementById('modal-compras-close')) {
+        document.getElementById('modal-compras-close').addEventListener('click', () => modalCompras.classList.remove('open'));
+        document.getElementById('btn-close-compras').addEventListener('click', () => modalCompras.classList.remove('open'));
+        modalCompras.addEventListener('click', (e) => { if (e.target === modalCompras) modalCompras.classList.remove('open'); });
+    }
+
+    const btnCopy = document.getElementById('btn-copy-compras');
+    if (btnCopy) {
+        btnCopy.addEventListener('click', () => {
+            const listEl = document.getElementById('compras-list');
+            let text = '🛒 Lista de Compras:\n\n';
+            listEl.querySelectorAll('.compras-cat').forEach(cat => {
+                text += `\n[ ${cat.textContent} ]\n`;
+                let node = cat.nextElementSibling;
+                while(node && node.classList.contains('compras-item')) {
+                    const label = node.querySelector('label').textContent;
+                    text += `- ${label}\n`;
+                    node = node.nextElementSibling;
+                }
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Lista copiada!', 'success');
+            });
+        });
+    }
+
+    // ========== AGENDA ==========
+    let currentAgendaDate = new Date();
+    const modalAgenda = document.getElementById('modal-agenda');
+    
+    if (document.getElementById('btn-open-agenda')) {
+        document.getElementById('btn-open-agenda').addEventListener('click', () => {
+            refreshPatientSelects();
+            document.getElementById('agenda-edit-id').value = '';
+            document.getElementById('ag-paciente').value = '';
+            document.getElementById('ag-data').value = '';
+            document.getElementById('ag-hora').value = '';
+            document.getElementById('ag-tipo').selectedIndex = 0;
+            document.getElementById('ag-status').selectedIndex = 0;
+            document.getElementById('ag-obs').value = '';
+            document.getElementById('agenda-modal-title').textContent = 'Nova Consulta';
+            modalAgenda.classList.add('open');
+        });
+    }
+
+    if (document.getElementById('modal-agenda-close')) {
+        document.getElementById('modal-agenda-close').addEventListener('click', () => modalAgenda.classList.remove('open'));
+        document.getElementById('btn-cancel-agenda').addEventListener('click', () => modalAgenda.classList.remove('open'));
+        modalAgenda.addEventListener('click', (e) => { if (e.target === modalAgenda) modalAgenda.classList.remove('open'); });
+    }
+
+    if (document.getElementById('btn-save-agenda')) {
+        document.getElementById('btn-save-agenda').addEventListener('click', () => {
+            const pid = parseInt(document.getElementById('ag-paciente').value);
+            const dataStr = document.getElementById('ag-data').value;
+            const hora = document.getElementById('ag-hora').value;
+            
+            if (!pid || !dataStr || !hora) { showToast('Preencha paciente, data e hora.', 'error'); return; }
+            
+            const p = patients.find(x => x.id === pid);
+            const editId = document.getElementById('agenda-edit-id').value;
+            
+            const apt = {
+                id: editId ? parseInt(editId) : Date.now(),
+                patientId: pid,
+                patientName: p.nome,
+                date: dataStr,
+                time: hora,
+                type: document.getElementById('ag-tipo').value,
+                status: document.getElementById('ag-status').value,
+                notes: document.getElementById('ag-obs').value
+            };
+            
+            if (editId) {
+                const idx = appointments.findIndex(a => a.id === parseInt(editId));
+                if (idx >= 0) appointments[idx] = apt;
+            } else {
+                appointments.push(apt);
+            }
+            
+            Store.set('appointments', appointments);
+            modalAgenda.classList.remove('open');
+            showToast(editId ? 'Consulta atualizada.' : 'Consulta agendada.', 'success');
+            refreshAgendaView();
+        });
+    }
+
+    if (document.getElementById('btn-cal-prev')) {
+        document.getElementById('btn-cal-prev').addEventListener('click', () => {
+            currentAgendaDate.setMonth(currentAgendaDate.getMonth() - 1);
+            renderCalendar();
+        });
+        document.getElementById('btn-cal-next').addEventListener('click', () => {
+            currentAgendaDate.setMonth(currentAgendaDate.getMonth() + 1);
+            renderCalendar();
+        });
+    }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        if (!grid) return;
+        
+        const year = currentAgendaDate.getFullYear();
+        const month = currentAgendaDate.getMonth();
+        
+        const monthsNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        document.getElementById('cal-month-year').textContent = `${monthsNames[month]} ${year}`;
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        let html = '';
+        for (let i = 0; i < firstDay; i++) {
+            html += `<div class="cal-day empty"></div>`;
+        }
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+            const isToday = dateStr === todayStr;
+            const dayApts = appointments.filter(a => a.date === dateStr);
+            
+            let dots = '';
+            dayApts.slice(0, 3).forEach(a => {
+                let color = 'var(--accent)';
+                if (a.status === 'Remarcada') color = 'var(--amber)';
+                if (a.status === 'Faltou') color = 'var(--red)';
+                dots += `<div class="cal-dot" style="background:${color}"></div>`;
+            });
+            
+            html += `
+                <div class="cal-day ${isToday ? 'today' : ''}" onclick="selectAgendaDate('${dateStr}')">
+                    <div class="cal-day-num">${i}</div>
+                    <div class="cal-dots">${dots}</div>
+                </div>
+            `;
+        }
+        grid.innerHTML = html;
+        renderUpcomingAppointments();
+    }
+
+    window.selectAgendaDate = function(dateStr) {
+        refreshPatientSelects();
+        document.getElementById('agenda-edit-id').value = '';
+        document.getElementById('ag-paciente').value = '';
+        document.getElementById('ag-data').value = dateStr;
+        document.getElementById('ag-hora').value = '';
+        document.getElementById('ag-tipo').selectedIndex = 0;
+        document.getElementById('ag-status').selectedIndex = 0;
+        document.getElementById('ag-obs').value = '';
+        document.getElementById('agenda-modal-title').textContent = 'Nova Consulta';
+        modalAgenda.classList.add('open');
+    }
+
+    window.editAppointment = function(id) {
+        const a = appointments.find(x => x.id === id);
+        if (!a) return;
+        refreshPatientSelects();
+        document.getElementById('agenda-edit-id').value = a.id;
+        document.getElementById('ag-paciente').value = a.patientId;
+        document.getElementById('ag-data').value = a.date;
+        document.getElementById('ag-hora').value = a.time;
+        document.getElementById('ag-tipo').value = a.type;
+        document.getElementById('ag-status').value = a.status;
+        document.getElementById('ag-obs').value = a.notes;
+        document.getElementById('agenda-modal-title').textContent = 'Editar Consulta';
+        modalAgenda.classList.add('open');
+    }
+
+    function renderUpcomingAppointments() {
+        const list = document.getElementById('agenda-upcoming-list');
+        if (!list) return;
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        const nextWeekStr = nextWeek.toISOString().split('T')[0];
+        
+        const upcoming = appointments.filter(a => a.date >= todayStr && a.date <= nextWeekStr);
+        upcoming.sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+        
+        if (upcoming.length === 0) {
+            list.innerHTML = '<div class="empty-small">Nenhuma consulta nos próximos 7 dias.</div>';
+            return;
+        }
+        
+        list.innerHTML = upcoming.map(a => {
+            let cls = '';
+            if (a.status === 'Remarcada') cls = 'remarcada';
+            if (a.status === 'Faltou') cls = 'faltou';
+            
+            const dateFmt = new Date(a.date).toLocaleDateString('pt-BR', {weekday: 'short', day: '2-digit', month: '2-digit'});
+            
+            return `
+                <div class="agenda-item ${cls}" onclick="editAppointment(${a.id})" style="cursor:pointer">
+                    <div class="agenda-item-time">${dateFmt} às ${a.time}</div>
+                    <div class="agenda-item-patient">${a.patientName}</div>
+                    <div class="agenda-item-type">${a.type} • ${a.status}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function refreshAgendaView() {
+        renderCalendar();
+    }
+
     // ========== INIT ==========
+    applyTheme(currentTheme);
     refreshDashboard();
     refreshPatientSelects();
     renderRecCards();
